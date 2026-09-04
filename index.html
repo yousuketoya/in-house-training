@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老健 内部研修ポータル</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* 1. ログイン前画面 */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #475569;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            color: #fff;
+        }
+
+        .btn-setting {
+            background-color: #475569;
+            color: #fff;
+        }
+
+        .btn-history {
+            background-color: #0284c7;
+            color: #fff;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .divider::before {
+            margin-right: .5em;
+        }
+
+        .divider::after {
+            margin-left: .5em;
+        }
+
+        .btn-google {
+            width: 100%;
+            background-color: #fff;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .status-message {
+            margin-top: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+
+        .status-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* 2. ポータル全体 */
+        #portal-container {
+            display: none;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #1e3a8a;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 研修カード */
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .training-card {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            width: fit-content;
+        }
+
+        .tag-mandatory {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .tag-optional {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title-link {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            display: block;
+        }
+
+        .card-title-link:hover {
+            text-decoration: underline;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .card-footer {
+            border-top: 1px solid #f1f5f9;
+            padding-top: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-detail {
+            background-color: #2563eb;
+            color: white;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 研修詳細ページ */
+        #detail-view {
+            display: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #2563eb;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            text-decoration: none;
+        }
+
+        .detail-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .detail-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0.5rem 0;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            background-color: #000;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .content-block {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .action-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-top: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            padding: 1.25rem;
+            border-radius: 6px;
+        }
+
+        .form-row-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-row-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-row-group select,
+        .form-row-group textarea {
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-row-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row-group select:focus,
+        .form-row-group textarea:focus {
+            border-color: #2563eb;
+        }
+
+        .btn-complete {
+            background-color: #10b981;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.75rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+
+        /* 3. モーダル共通スタイル（設定・履歴） */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            width: 100%;
+            max-width: 800px;
+            max-height: 85vh;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            color: #1e3a8a;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 0.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-row select,
+        .form-row input {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .form-row select {
+            flex: 1;
+            min-width: 110px;
+        }
+
+        .form-row input {
+            flex: 2;
+            min-width: 140px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.60rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .data-table th {
+            background-color: #f8fafc;
+            color: #475569;
+        }
+
+        .comment-cell {
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #334155;
+            font-size: 0.8rem;
+        }
+
+        .btn-delete {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 1. ログイン画面 -->
+    <div id="login-wrapper" class="login-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>老健 職員研修ポータル</h1>
+                <p>受講を開始するにはログインしてください</p>
+            </div>
+
+            <div class="form-group">
+                <label for="email">メールアドレス</label>
+                <input type="email" id="email" class="form-control" placeholder="example@facility.or.jp">
+            </div>
+
+            <div class="form-group">
+                <label for="password">パスワード</label>
+                <input type="password" id="password" class="form-control" placeholder="••••••••">
+            </div>
+
+            <div class="btn-group">
+                <button id="login-btn" class="btn btn-primary" style="flex:1;">ログイン</button>
+                <button id="signup-btn" class="btn btn-secondary" style="flex:1;">新規登録</button>
+            </div>
+
+            <div class="divider">または</div>
+
+            <button id="google-login-btn" class="btn btn-google">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                    <path fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                Googleでログイン
+            </button>
+
+            <div id="status-message" class="status-message"></div>
+        </div>
+    </div>
+
+    <!-- 2. ポータル全体 -->
+    <div id="portal-container">
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <span>🏥</span> 老健 内部研修ポータル
+            </div>
+            <div class="user-info">
+                <span id="user-display">ログイン中</span>
+                <button id="open-history-btn" class="btn btn-history">📊 受講履歴</button>
+                <button id="open-setting-btn" class="btn btn-setting">⚙️ 職員設定</button>
+                <button id="logout-btn" class="btn btn-logout">ログアウト</button>
+            </div>
+        </nav>
+
+        <!-- A. 研修一覧画面 -->
+        <main id="list-view" class="container">
+            <div class="section-title">
+                <span>📚</span> 受講コンテンツ一覧
+            </div>
+
+            <div class="training-grid">
+                <div class="training-card">
+                    <div class="card-body">
+                        <span class="card-tag tag-mandatory">法定必須</span>
+                        <a class="card-title-link" onclick="openDetail('infection')">
+                            1. 感染症対策・身体拘束廃止の基本 ➔
+                        </a>
+                        <p class="card-desc">施設内での感染拡大防止手順と、身体拘束ゼロに向けた具体的なケア方法について学習します。</p>
+                        <div class="card-footer" style="justify-content: flex-end;">
+                            <button class="btn-detail" onclick="openDetail('infection')">受講する</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="training-card">
+                    <div class="card-body">
+                        <span class="card-tag tag-mandatory">法定必須</span>
+                        <a class="card-title-link" onclick="openDetail('safety')">
+                            2. 事故防止（ヒヤリハット）と安全管理 ➔
+                        </a>
+                        <p class="card-desc">転倒・転落事故を未然に防ぐ予防アプローチと、報告書の活用方法を解説します。</p>
+                        <div class="card-footer" style="justify-content: flex-end;">
+                            <button class="btn-detail" onclick="openDetail('safety')">受講する</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="training-card">
+                    <div class="card-body">
+                        <span class="card-tag tag-optional">スキルアップ</span>
+                        <a class="card-title-link" onclick="openDetail('care')">
+                            3. 介助動作とトランスファーのコツ ➔
+                        </a>
+                        <p class="card-desc">ノーリフティングケアの考え方に基づいた、負担の少ない移乗介助を学びます。</p>
+                        <div class="card-footer" style="justify-content: flex-end;">
+                            <button class="btn-detail" onclick="openDetail('care')">受講する</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- B. 研修詳細ページ -->
+        <main id="detail-view" class="container">
+            <a class="back-link" onclick="closeDetail()">← 一覧に戻る</a>
+
+            <div class="detail-card">
+                <div class="detail-header">
+                    <span id="detail-tag" class="card-tag"></span>
+                    <h1 id="detail-title" class="detail-title"></h1>
+                </div>
+
+                <div class="video-container">
+                    <iframe id="detail-video" src="" title="研修動画" allowfullscreen></iframe>
+                </div>
+
+                <div class="content-block">
+                    <h3 style="margin-bottom:0.5rem; font-size:1rem; color:#1e293b;">📌 本研修のポイント</h3>
+                    <p id="detail-description"></p>
+                </div>
+
+                <!-- 受講者選択・感想入力・完了記録エリア -->
+                <div class="action-area">
+                    <div class="form-row-group">
+                        <label>受講者選択（フロア ➔ 職種 ➔ 氏名）:</label>
+                        <div class="filter-select-group">
+                            <select id="detail-floor-select">
+                                <option value="2階">2階</option>
+                                <option value="1階">1階</option>
+                            </select>
+                            <select id="detail-role-select">
+                                <!-- JSで動的に職種がセットされます -->
+                            </select>
+                            <select id="detail-name-select">
+                                <!-- JSで動的に名前がセットされます -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-group">
+                        <label for="detail-comment-input">受講時の感想・学んだこと:</label>
+                        <textarea id="detail-comment-input"
+                            placeholder="動画を視聴して気づいたことや、今後の業務で意識したい点を入力してください（任意）"></textarea>
+                    </div>
+
+                    <button id="detail-complete-btn" class="btn-complete">受講完了と感想を記録する</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 3. 設定モーダル（職員登録） -->
+    <div id="setting-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ 職員情報設定</h2>
+                <button id="close-setting-btn" class="btn-close">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">所属フロア・職種を選択し、氏名を登録してください。</p>
+
+                <div class="form-row">
+                    <select id="staff-floor">
+                        <option value="2階">2階</option>
+                        <option value="1階">1階</option>
+                    </select>
+
+                    <select id="staff-role">
+                        <!-- JSで切替 -->
+                    </select>
+
+                    <input type="text" id="staff-name" placeholder="氏名を入力">
+
+                    <button id="add-staff-btn" class="btn btn-primary" style="padding: 0.5rem 1rem;">追加</button>
+                </div>
+
+                <h3 style="font-size:0.95rem; color:#1e293b; margin-top:1.5rem; margin-bottom:0.5rem;">登録済み職員一覧</h3>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>フロア</th>
+                            <th>職種</th>
+                            <th>氏名</th>
+                            <th style="width: 50px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staff-table-body">
+                        <!-- JSで描画 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 受講履歴確認モーダル -->
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 研修受講履歴一覧</h2>
+                <button id="close-history-btn" class="btn-close">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">これまでに記録された研修の受講完了履歴と感想です。</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 110px;">受講日時</th>
+                            <th style="width: 160px;">職員名（所属/職種）</th>
+                            <th style="width: 180px;">研修タイトル</th>
+                            <th>感想・コメント</th>
+                            <th style="width: 50px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- JSで描画 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRJMk27jAZeTmi_WhXbS6dPMxyRW7XCxo",
+            authDomain: "my-logoin-app.firebaseapp.com",
+            projectId: "my-logoin-app",
+            storageBucket: "my-logoin-app.firebasestorage.app",
+            messagingSenderId: "326384391882",
+            appId: "1:326384391882:web:e32dbad5eb362e654b0633"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        const loginWrapper = document.getElementById("login-wrapper");
+        const portalContainer = document.getElementById("portal-container");
+        const userDisplay = document.getElementById("user-display");
+        const listView = document.getElementById("list-view");
+        const detailView = document.getElementById("detail-view");
+
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const signupBtn = document.getElementById("signup-btn");
+        const loginBtn = document.getElementById("login-btn");
+        const googleLoginBtn = document.getElementById("google-login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
+        const statusMsg = document.getElementById("status-message");
+
+        // 研修データ
+        const trainingData = {
+            infection: {
+                tagClass: "tag-mandatory",
+                tagText: "法定必須",
+                title: "1. 感染症対策・身体拘束廃止の基本",
+                videoUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+                description: "標準予防策の徹底や手洗い手順、防護具の脱着方法を学びます。また、身体拘束の原則禁止規定と三要件について再確認します。"
+            },
+            safety: {
+                tagClass: "tag-mandatory",
+                tagText: "法定必須",
+                title: "2. 事故防止（ヒヤリハット）と安全管理",
+                videoUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+                description: "ヒヤリハット事例の共有と分析を通して、施設全体でのリスク管理体制を強化します。"
+            },
+            care: {
+                tagClass: "tag-optional",
+                tagText: "スキルアップ",
+                title: "3. 介助動作とトランスファーのコツ",
+                videoUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+                description: "ボディメカニクスを活用し、腰痛を予防しながら安全に移乗する基礎をマスターします。"
+            }
+        };
+
+        let currentActiveKey = null;
+
+        // --- 職員データ管理 ---
+        const rolesByFloor = {
+            "2階": ["看護師長", "看護師", "介護士", "ケアマネージャー"],
+            "1階": ["副施設長", "事務長", "リハビリ", "通所リハ", "栄養士"]
+        };
+
+        let staffList = JSON.parse(localStorage.getItem("roken_staff_list")) || [];
+        // --- 受講履歴データ管理 ---
+        let historyList = JSON.parse(localStorage.getItem("roken_history_list")) || [];
+
+        const staffFloorSelect = document.getElementById("staff-floor");
+        const staffRoleSelect = document.getElementById("staff-role");
+        const staffNameInput = document.getElementById("staff-name");
+        const staffTableBody = document.getElementById("staff-table-body");
+
+        // 詳細ページの3段階絞り込み用要素
+        const detailFloorSelect = document.getElementById("detail-floor-select");
+        const detailRoleSelect = document.getElementById("detail-role-select");
+        const detailNameSelect = document.getElementById("detail-name-select");
+        const detailCommentInput = document.getElementById("detail-comment-input");
+        const historyTableBody = document.getElementById("history-table-body");
+
+        // 職員登録の職種ドロップダウン更新
+        const updateRoleOptions = () => {
+            const selectedFloor = staffFloorSelect.value;
+            const roles = rolesByFloor[selectedFloor] || [];
+            staffRoleSelect.innerHTML = roles.map(role => `<option value="${role}">${role}</option>`).join("");
+        };
+
+        staffFloorSelect.addEventListener("change", updateRoleOptions);
+
+        // --- 修正箇所：詳細ページの3段階連動ドロップダウン処理 ---
+        const updateDetailRoleOptions = () => {
+            const selectedFloor = detailFloorSelect.value;
+            const roles = rolesByFloor[selectedFloor] || [];
+            detailRoleSelect.innerHTML = roles.map(role => `<option value="${role}">${role}</option>`).join("");
+            updateDetailNameOptions();
+        };
+
+        const updateDetailNameOptions = () => {
+            const selectedFloor = detailFloorSelect.value;
+            const selectedRole = detailRoleSelect.value;
+
+            // 選択された「フロア」かつ「職種」に一致する職員を抽出
+            const filteredStaff = staffList.filter(s => s.floor === selectedFloor && s.role === selectedRole);
+
+            if (filteredStaff.length === 0) {
+                detailNameSelect.innerHTML = '<option value="">該当する職員がいません</option>';
+            } else {
+                detailNameSelect.innerHTML = filteredStaff.map(staff =>
+                    `<option value="${staff.name}">${staff.name}</option>`
+                ).join("");
+            }
+        };
+
+        detailFloorSelect.addEventListener("change", updateDetailRoleOptions);
+        detailRoleSelect.addEventListener("change", updateDetailNameOptions);
+
+        // 職員テーブル描画
+        const renderStaffTable = () => {
+            staffTableBody.innerHTML = staffList.length ? staffList.map((staff, index) => `
+            <tr>
+                <td>${staff.floor}</td>
+                <td>${staff.role}</td>
+                <td>${staff.name}</td>
+                <td><button class="btn-delete" onclick="deleteStaff(${index})">削除</button></td>
+            </tr>
+        `).join("") : '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">職員が登録されていません</td></tr>';
+        };
+
+        // 職員追加
+        document.getElementById("add-staff-btn").addEventListener("click", () => {
+            const floor = staffFloorSelect.value;
+            const role = staffRoleSelect.value;
+            const name = staffNameInput.value.trim();
+
+            if (!name) {
+                alert("氏名を入力してください");
+                return;
+            }
+
+            staffList.push({ floor, role, name });
+            localStorage.setItem("roken_staff_list", JSON.stringify(staffList));
+            staffNameInput.value = "";
+            renderStaffTable();
+        });
+
+        // 職員削除
+        window.deleteStaff = (index) => {
+            staffList.splice(index, 1);
+            localStorage.setItem("roken_staff_list", JSON.stringify(staffList));
+            renderStaffTable();
+        };
+
+        // --- 受講履歴の描画と追加 ---
+        const renderHistoryTable = () => {
+            historyTableBody.innerHTML = historyList.length ? historyList.map((item, index) => `
+            <tr>
+                <td>${item.date}</td>
+                <td>${item.staffName}<br><span style="color:#64748b; font-size:0.75rem;">（${item.staffFloor}・${item.staffRole}）</span></td>
+                <td>${item.trainingTitle}</td>
+                <td class="comment-cell">${item.comment ? escapeHtml(item.comment) : '<span style="color:#94a3b8;">（感想なし）</span>'}</td>
+                <td><button class="btn-delete" onclick="deleteHistory(${index})">削除</button></td>
+            </tr>
+        `).join("") : '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">受講履歴はありません</td></tr>';
+        };
+
+        // HTMLエスケープ処理（安全用）
+        const escapeHtml = (str) => {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+
+        // 履歴削除
+        window.deleteHistory = (index) => {
+            historyList.splice(index, 1);
+            localStorage.setItem("roken_history_list", JSON.stringify(historyList));
+            renderHistoryTable();
+        };
+
+        // --- 修正箇所：受講完了ボタン押下時の処理 ---
+        document.getElementById("detail-complete-btn").addEventListener("click", () => {
+            if (!currentActiveKey) return;
+
+            const floor = detailFloorSelect.value;
+            const role = detailRoleSelect.value;
+            const name = detailNameSelect.value;
+
+            if (!name || name === "該当する職員がいません") {
+                alert("受講対象の職員を選択してください。登録がない場合は「⚙️ 職員設定」から追加してください。");
+                return;
+            }
+
+            const training = trainingData[currentActiveKey];
+            const comment = detailCommentInput.value.trim();
+
+            // 現在日時を取得 (YYYY/MM/DD HH:mm)
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            const newRecord = {
+                date: dateStr,
+                staffName: name,
+                staffFloor: floor,
+                staffRole: role,
+                trainingTitle: training.title,
+                comment: comment
+            };
+
+            historyList.unshift(newRecord);
+            localStorage.setItem("roken_history_list", JSON.stringify(historyList));
+
+            alert(`${name} さんの受講完了と感想を記録しました！`);
+            detailCommentInput.value = "";
+        });
+
+        // モーダル開閉制御
+        const settingModal = document.getElementById("setting-modal");
+        const historyModal = document.getElementById("history-modal");
+
+        document.getElementById("open-setting-btn").addEventListener("click", () => {
+            updateRoleOptions();
+            renderStaffTable();
+            settingModal.style.display = "flex";
+        });
+
+        document.getElementById("close-setting-btn").addEventListener("click", () => {
+            settingModal.style.display = "none";
+        });
+
+        document.getElementById("open-history-btn").addEventListener("click", () => {
+            renderHistoryTable();
+            historyModal.style.display = "flex";
+        });
+
+        document.getElementById("close-history-btn").addEventListener("click", () => {
+            historyModal.style.display = "none";
+        });
+
+        // --- 修正箇所：画面遷移ロジック（詳細を開いた時にドロップダウンを初期化） ---
+        window.openDetail = (key) => {
+            currentActiveKey = key;
+            const data = trainingData[key];
+
+            document.getElementById("detail-tag").className = `card-tag ${data.tagClass}`;
+            document.getElementById("detail-tag").textContent = data.tagText;
+            document.getElementById("detail-title").textContent = data.title;
+            document.getElementById("detail-video").src = data.videoUrl;
+            document.getElementById("detail-description").textContent = data.description;
+
+            detailCommentInput.value = "";
+
+            // 初期状態として「2階」を選んだ時の職種・氏名を生成
+            detailFloorSelect.value = "2階";
+            updateDetailRoleOptions();
+
+            listView.style.display = "none";
+            detailView.style.display = "block";
+        };
+
+        window.closeDetail = () => {
+            document.getElementById("detail-video").src = "";
+            detailView.style.display = "none";
+            listView.style.display = "block";
+        };
+
+        // Auth関連処理
+        const showMessage = (text, isError = false) => {
+            statusMsg.textContent = text;
+            statusMsg.className = `status-message active ${isError ? 'status-error' : 'status-info'}`;
+        };
+
+        const clearMessage = () => {
+            statusMsg.textContent = "";
+            statusMsg.className = "status-message";
+        };
+
+        signupBtn.addEventListener("click", () => {
+            clearMessage();
+            if (!emailInput.value || !passwordInput.value) {
+                showMessage("メールアドレスとパスワードを入力してください", true);
+                return;
+            }
+            createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+                .catch((error) => showMessage("登録エラー: " + error.message, true));
+        });
+
+        loginBtn.addEventListener("click", () => {
+            clearMessage();
+            if (!emailInput.value || !passwordInput.value) {
+                showMessage("メールアドレスとパスワードを入力してください", true);
+                return;
+            }
+            signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+                .catch((error) => showMessage("ログインエラー: " + error.message, true));
+        });
+
+        googleLoginBtn.addEventListener("click", () => {
+            clearMessage();
+            signInWithPopup(auth, googleProvider)
+                .catch((error) => showMessage("Googleログインエラー: " + error.message, true));
+        });
+
+        logoutBtn.addEventListener("click", () => {
+            clearMessage();
+            signOut(auth);
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginWrapper.style.display = "none";
+                portalContainer.style.display = "block";
+
+                const name = user.displayName ? `${user.displayName} 様` : user.email;
+                userDisplay.textContent = name;
+            } else {
+                loginWrapper.style.display = "flex";
+                portalContainer.style.display = "none";
+                closeDetail();
+                settingModal.style.display = "none";
+                historyModal.style.display = "none";
+                emailInput.value = "";
+                passwordInput.value = "";
+            }
+        });
+    </script>
+</body>
+
+</html>
