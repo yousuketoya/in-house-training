@@ -702,9 +702,9 @@
                     </div>
 
                     <div class="form-row-group">
-                        <label for="detail-comment-input">受講時の感想・学んだこと:</label>
+                        <label for="detail-comment-input">受講時の感想・学んだこと <span style="color: red;">*必須</span>:</label>
                         <textarea id="detail-comment-input"
-                            placeholder="動画を視聴して気づいたことや、今後の業務で意識したい点を入力してください（任意）"></textarea>
+                            placeholder="動画を視聴して気づいたことや、今後の業務で意識したい点を入力してください"></textarea>
                     </div>
 
                     <button id="detail-complete-btn" class="btn-complete">受講完了と感想を記録する</button>
@@ -980,6 +980,7 @@
             renderHistoryTable();
         };
 
+
         // --- 修正箇所：受講完了ボタン押下時の処理 ---
         document.getElementById("detail-complete-btn").addEventListener("click", () => {
             if (!currentActiveKey) return;
@@ -987,14 +988,24 @@
             const floor = detailFloorSelect.value;
             const role = detailRoleSelect.value;
             const name = detailNameSelect.value;
+            const comment = detailCommentInput.value.trim(); // 1. ここで宣言・取得
 
+            // 1. 職員選択のチェック
             if (!name || name === "該当する職員がいません") {
                 alert("受講対象の職員を選択してください。登録がない場合は「⚙️ 職員設定」から追加してください。");
                 return;
             }
 
+            // 2. 感想未入力のチェック
+            if (comment === "") {
+                alert("感想を入力してください。");
+                detailCommentInput.focus(); // 感想の入力欄にカーソルを移動
+                return; // ここで処理を中断
+            }
+
             const training = trainingData[currentActiveKey];
-            const comment = detailCommentInput.value.trim();
+
+            // ★重複していた「const comment = ...」は削除しました★
 
             // 現在日時を取得 (YYYY/MM/DD HH:mm)
             const now = new Date();
