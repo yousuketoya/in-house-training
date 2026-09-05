@@ -622,6 +622,8 @@
             </div>
             <div class="user-info">
                 <span id="user-display">ログイン中</span>
+                <!-- 研修追加モーダルを開くボタン -->
+                <button id="open-add-training-btn" class="btn-primary">➕ 研修追加</button>
                 <button id="open-history-btn" class="btn btn-history">📊 受講履歴</button>
                 <button id="open-setting-btn" class="btn btn-setting">⚙️ 職員設定</button>
                 <button id="logout-btn" class="btn btn-logout">ログアウト</button>
@@ -801,6 +803,64 @@
                         <!-- JSで描画 -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 研修追加モーダル -->
+    <div id="add-training-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h3>➕ 新規研修の追加</h3>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px; text-align: left;">
+                <label>
+                    区分：
+                    <select id="input-tag-class" style="width: 100%; padding: 8px; margin-top: 4px;">
+                        <option value="tag-mandatory|法定必須">法定必須</option>
+                        <option value="tag-optional|スキルアップ">スキルアップ</option>
+                    </select>
+                </label>
+
+                <label>
+                    研修タイトル：
+                    <input type="text" id="input-title" placeholder="例: 4. 虐待防止・権利擁護の推進"
+                        style="width: 100%; padding: 8px; margin-top: 4px;">
+                </label>
+
+                <label>
+                    作成者：
+                    <input type="text" id="input-author" placeholder="例: リハビリテーション課 山田"
+                        style="width: 100%; padding: 8px; margin-top: 4px;">
+                </label>
+
+                <label>
+                    動画URL (YouTube埋め込み用) / 省略可：
+                    <input type="text" id="input-video-url" placeholder="https://www.youtube-nocookie.com/embed/..."
+                        style="width: 100%; padding: 8px; margin-top: 4px;">
+                </label>
+
+                <label>
+                    PDF資料URL / 省略可：
+                    <input type="text" id="input-pdf-url" placeholder="https://example.com/document.pdf"
+                        style="width: 100%; padding: 8px; margin-top: 4px;">
+                </label>
+
+                <label>
+                    サムネイル画像URL / 省略可：
+                    <input type="text" id="input-image-url" placeholder="https://example.com/image.jpg"
+                        style="width: 100%; padding: 8px; margin-top: 4px;">
+                </label>
+
+                <label>
+                    本研修のポイント（概要・説明）：
+                    <textarea id="input-description" rows="4" placeholder="研修の狙いや学べるポイントを入力してください"
+                        style="width: 100%; padding: 8px; margin-top: 4px;"></textarea>
+                </label>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button id="close-add-training-btn" style="padding: 8px 16px;">キャンセル</button>
+                <button id="save-training-btn" class="btn-primary" style="padding: 8px 16px;">保存して追加</button>
             </div>
         </div>
     </div>
@@ -1073,17 +1133,29 @@
             currentActiveKey = key;
             const data = trainingData[key];
 
-            if (!data) return; //該当するデータがない場合のエラーを防ぐ
+            if (!data) return;
 
             document.getElementById("detail-tag").className = `card-tag ${data.tagClass}`;
             document.getElementById("detail-tag").textContent = data.tagText;
             document.getElementById("detail-title").textContent = data.title;
-            document.getElementById("detail-video").src = data.videoUrl;
+            document.getElementById("detail-video").src = data.videoUrl || "";
             document.getElementById("detail-description").textContent = data.description;
 
-            detailCommentInput.value = "";
+            // 作成者・PDF・画像項目の表示制御（要素が存在する場合）
+            const authorElem = document.getElementById("detail-author");
+            if (authorElem) authorElem.textContent = data.author ? `作成者: ${data.author}` : "";
 
-            // 初期状態として「2階」を選んだ時の職種・氏名を生成
+            const pdfElem = document.getElementById("detail-pdf-link");
+            if (pdfElem) {
+                if (data.pdfUrl) {
+                    pdfElem.href = data.pdfUrl;
+                    pdfElem.style.display = "inline-block";
+                } else {
+                    pdfElem.style.display = "none";
+                }
+            }
+
+            detailCommentInput.value = "";
             detailFloorSelect.value = "2階";
             updateDetailRoleOptions();
 
@@ -1156,6 +1228,103 @@
                 passwordInput.value = "";
             }
         });
+
+        // --- 新規研修追加の管理ロジック ---
+        const addTrainingModal = document.getElementById("add-training-modal");
+        const openAddTrainingBtn = document.getElementById("open-add-training-btn");
+        const closeAddTrainingBtn = document.getElementById("close-add-training-btn");
+        const saveTrainingBtn = document.getElementById("save-training-btn");
+        const trainingGrid = document.querySelector(".training-grid");
+
+        // ローカルストレージからカスタム研修を取得して反映
+        let customTrainings = JSON.parse(localStorage.getItem("roken_custom_trainings")) || {};
+        Object.assign(trainingData, customTrainings);
+
+        // カードを1枚動的に生成してグリッドに追加する関数
+        const renderTrainingCard = (key, data) => {
+            const cardHtml = `
+        <div class="training-card" id="card-${key}">
+            <div class="card-body" onclick="openDetail('${key}')" style="cursor: pointer;">
+                <span class="card-tag ${data.tagClass}">${data.tagText}</span>
+                <a class="card-title-link">
+                    ${escapeHtml(data.title)} ➔
+                </a>
+                <p class="card-desc">${escapeHtml(data.description)}</p>
+                <div class="card-footer" style="justify-content: flex-end;">
+                    <button class="btn-detail" onclick="event.stopPropagation(); openDetail('${key}')">受講する</button>
+                </div>
+            </div>
+        </div>
+    `;
+            trainingGrid.insertAdjacentHTML("beforeend", cardHtml);
+        };
+
+        // 起動時に保存済みのカスタム研修を描画
+        Object.keys(customTrainings).forEach(key => {
+            renderTrainingCard(key, customTrainings[key]);
+        });
+
+        // モーダル開閉
+        if (openAddTrainingBtn) {
+            openAddTrainingBtn.addEventListener("click", () => {
+                addTrainingModal.style.display = "flex";
+            });
+        }
+
+        if (closeAddTrainingBtn) {
+            closeAddTrainingBtn.addEventListener("click", () => {
+                addTrainingModal.style.display = "none";
+            });
+        }
+
+        // 保存ボタン押下時
+        if (saveTrainingBtn) {
+            saveTrainingBtn.addEventListener("click", () => {
+                const title = document.getElementById("input-title").value.trim();
+                const author = document.getElementById("input-author").value.trim();
+                const videoUrl = document.getElementById("input-video-url").value.trim();
+                const pdfUrl = document.getElementById("input-pdf-url").value.trim();
+                const imageUrl = document.getElementById("input-image-url").value.trim();
+                const description = document.getElementById("input-description").value.trim();
+                const [tagClass, tagText] = document.getElementById("input-tag-class").value.split("|");
+
+                if (!title) {
+                    alert("研修タイトルを入力してください");
+                    return;
+                }
+
+                const newKey = "custom_" + Date.now();
+                const newTraining = {
+                    tagClass,
+                    tagText,
+                    title,
+                    author,
+                    videoUrl,
+                    pdfUrl,
+                    imageUrl,
+                    description
+                };
+
+                // メモリとストレージに保存
+                trainingData[newKey] = newTraining;
+                customTrainings[newKey] = newTraining;
+                localStorage.setItem("roken_custom_trainings", JSON.stringify(customTrainings));
+
+                // 画面上にカードを追加
+                renderTrainingCard(newKey, newTraining);
+
+                // 入力フォームのクリアと閉じ
+                document.getElementById("input-title").value = "";
+                document.getElementById("input-author").value = "";
+                document.getElementById("input-video-url").value = "";
+                document.getElementById("input-pdf-url").value = "";
+                document.getElementById("input-image-url").value = "";
+                document.getElementById("input-description").value = "";
+                addTrainingModal.style.display = "none";
+
+                alert("研修カードを追加しました！");
+            });
+        }
     </script>
 </body>
 
