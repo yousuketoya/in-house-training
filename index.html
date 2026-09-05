@@ -277,6 +277,18 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .card-body:hover {
+            background-color: #f8f9fa;
+            /* ホバー時に薄いグレーにする */
+        }
+
+        .card-body:active {
+            transform: scale(0.99);
+            /* クリックした瞬間に少し凹む演出 */
         }
 
         .card-title-link {
@@ -623,41 +635,47 @@
             </div>
 
             <div class="training-grid">
+                <!-- 1. 感染症対策 -->
                 <div class="training-card">
-                    <div class="card-body">
+                    <div class="card-body" onclick="openDetail('infection')" style="cursor: pointer;">
                         <span class="card-tag tag-mandatory">法定必須</span>
-                        <a class="card-title-link" onclick="openDetail('infection')">
+                        <a class="card-title-link">
                             1. 感染症対策・身体拘束廃止の基本 ➔
                         </a>
                         <p class="card-desc">施設内での感染拡大防止手順と、身体拘束ゼロに向けた具体的なケア方法について学習します。</p>
                         <div class="card-footer" style="justify-content: flex-end;">
-                            <button class="btn-detail" onclick="openDetail('infection')">受講する</button>
+                            <button class="btn-detail"
+                                onclick="event.stopPropagation(); openDetail('infection')">受講する</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- 2. 事故防止 -->
                 <div class="training-card">
-                    <div class="card-body">
+                    <div class="card-body" onclick="openDetail('safety')" style="cursor: pointer;">
                         <span class="card-tag tag-mandatory">法定必須</span>
-                        <a class="card-title-link" onclick="openDetail('safety')">
+                        <a class="card-title-link">
                             2. 事故防止（ヒヤリハット）と安全管理 ➔
                         </a>
                         <p class="card-desc">転倒・転落事故を未然に防ぐ予防アプローチと、報告書の活用方法を解説します。</p>
                         <div class="card-footer" style="justify-content: flex-end;">
-                            <button class="btn-detail" onclick="openDetail('safety')">受講する</button>
+                            <button class="btn-detail"
+                                onclick="event.stopPropagation(); openDetail('safety')">受講する</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- 3. 介助動作 -->
                 <div class="training-card">
-                    <div class="card-body">
+                    <div class="card-body" onclick="openDetail('care')" style="cursor: pointer;">
                         <span class="card-tag tag-optional">スキルアップ</span>
-                        <a class="card-title-link" onclick="openDetail('care')">
+                        <a class="card-title-link">
                             3. 介助動作とトランスファーのコツ ➔
                         </a>
                         <p class="card-desc">ノーリフティングケアの考え方に基づいた、負担の少ない移乗介助を学びます。</p>
                         <div class="card-footer" style="justify-content: flex-end;">
-                            <button class="btn-detail" onclick="openDetail('care')">受講する</button>
+                            <button class="btn-detail"
+                                onclick="event.stopPropagation(); openDetail('care')">受講する</button>
                         </div>
                     </div>
                 </div>
@@ -1005,6 +1023,8 @@
 
             const training = trainingData[currentActiveKey];
 
+            // ★重複していた「const comment = ...」は削除しました★
+
             // 現在日時を取得 (YYYY/MM/DD HH:mm)
             const now = new Date();
             const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -1052,6 +1072,8 @@
         window.openDetail = (key) => {
             currentActiveKey = key;
             const data = trainingData[key];
+
+            if (!data) return; //該当するデータがない場合のエラーを防ぐ
 
             document.getElementById("detail-tag").className = `card-tag ${data.tagClass}`;
             document.getElementById("detail-tag").textContent = data.tagText;
