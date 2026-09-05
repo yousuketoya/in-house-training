@@ -789,6 +789,7 @@
 
     <!-- 5. JavaScript -->
     <script type="module">
+        // CDN形式のインポート（そのままでOK）
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import {
             getAuth,
@@ -800,13 +801,14 @@
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // 取得した新しい firebaseConfig に差し替え
         const firebaseConfig = {
-            apiKey: "AIzaSyCRJMk27jAZeTmi_WhXbS6dPMxyRW7XCxo",
-            authDomain: "my-logoin-app.firebaseapp.com",
-            projectId: "my-logoin-app",
-            storageBucket: "my-logoin-app.firebasestorage.app",
-            messagingSenderId: "326384391882",
-            appId: "1:326384391882:web:e32dbad5eb362e654b0633"
+            apiKey: "AIzaSyAtCJTSaWFOt0YFgxtDEwVX9NHbgLKj5DE",
+            authDomain: "training-report-board.firebaseapp.com",
+            projectId: "training-report-board",
+            storageBucket: "training-report-board.firebasestorage.app",
+            messagingSenderId: "1023777229399",
+            appId: "1:1023777229399:web:12341f475d1d68a41b7112"
         };
 
         const app = initializeApp(firebaseConfig);
