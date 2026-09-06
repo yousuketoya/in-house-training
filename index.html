@@ -1170,6 +1170,7 @@
         // モーダル開閉制御
         const settingModal = document.getElementById("setting-modal");
         const historyModal = document.getElementById("history-modal");
+        const trainingStatusModal = document.getElementById("training-status-modal");
 
         const openSettingBtn = document.getElementById("open-setting-btn");
         if (openSettingBtn) {
@@ -1387,7 +1388,6 @@
             document.getElementById("detail-slides").src = "";
             detailView.style.display = "none";
             listView.style.display = "block";
-            const trainingStatusModal = document.getElementById("training-status-modal");
             if (trainingStatusModal) trainingStatusModal.style.display = "none";
         };
 
@@ -1428,7 +1428,6 @@
             if (historyModal) historyModal.style.display = "none";
             const staffSelectionModal = document.getElementById("staff-selection-modal");
             if (staffSelectionModal) staffSelectionModal.style.display = "none";
-            const trainingStatusModal = document.getElementById("training-status-modal");
             if (trainingStatusModal) trainingStatusModal.style.display = "none";
             if (emailInput) emailInput.value = "";
             if (passwordInput) passwordInput.value = "";
