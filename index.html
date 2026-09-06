@@ -918,13 +918,13 @@
                 </label>
 
                 <label>
-                    動画URL (YouTube埋め込み用) / 省略可：
-                    <input type="text" id="input-video-url" placeholder="https://www.youtube-nocookie.com/embed/..."
+                    動画URL (YouTube) / 省略可：
+                    <input type="text" id="input-video-url" placeholder="https://www.youtube.com/watch?v=... または https://youtu.be/..."
                         style="width: 100%; padding: 8px; margin-top: 4px;">
                 </label>
 
                 <label>
-                    スライドURL (Google Slides埋め込み用) / 省略可：
+                    スライドURL (Google Slides) / 省略可：
                     <input type="text" id="input-slides-url" placeholder="https://docs.google.com/presentation/d/..."
                         style="width: 100%; padding: 8px; margin-top: 4px;">
                 </label>
@@ -1285,6 +1285,21 @@
             return id ? `https://docs.google.com/presentation/d/${id}/embed` : url;
         };
 
+        // YouTubeのURLを埋め込み用に変換
+        const convertYoutubeUrl = (url) => {
+            if (!url) return "";
+            // パターン1: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+            let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+            if (match) {
+                return `https://www.youtube-nocookie.com/embed/${match[1]}`;
+            }
+            // 既に埋め込みURL形式の場合
+            if (url.includes("youtube-nocookie.com/embed")) {
+                return url;
+            }
+            return url;
+        };
+
         // --- 画面遷移ロジック（詳細を開いた時にドロップダウン・コンテンツを初期化） ---
         window.openDetail = (key) => {
             currentActiveKey = key;
@@ -1295,7 +1310,7 @@
             document.getElementById("detail-tag").className = `card-tag ${data.tagClass}`;
             document.getElementById("detail-tag").textContent = data.tagText;
             document.getElementById("detail-title").textContent = data.title;
-            document.getElementById("detail-video").src = data.videoUrl || "";
+            document.getElementById("detail-video").src = convertYoutubeUrl(data.videoUrl) || "";
             document.getElementById("detail-slides").src = convertGoogleSlidesUrl(data.slidesUrl) || "";
             
             // descriptionがない場合はsummaryを使用
