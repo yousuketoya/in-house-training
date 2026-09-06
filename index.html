@@ -237,9 +237,15 @@
         /* 研修カード */
         .training-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 768px) {
+            .training-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         .training-card {
@@ -570,13 +576,12 @@
 </head>
 
 <body>
-
     <!-- 1. ログイン画面 -->
     <div id="login-wrapper" class="login-wrapper">
         <div class="auth-card">
             <div class="auth-header">
                 <h1>老健 職員研修ポータル</h1>
-                <p>受講を開始するにはログインしてください</p>
+                <p>デモモード：任意のメール・パスワードでログインできます</p>
             </div>
 
             <div class="form-group">
@@ -623,7 +628,7 @@
             <div class="user-info">
                 <span id="user-display">ログイン中</span>
                 <!-- 研修追加モーダルを開くボタン -->
-                <button id="open-add-training-btn" class="btn-primary">➕研修追加</button>
+                <button id="open-add-training-btn" class="btn btn-primary">研修追加</button>
                 <button id="open-history-btn" class="btn btn-history">📊履歴</button>
                 <button id="open-setting-btn" class="btn btn-setting">⚙️設定</button>
                 <button id="logout-btn" class="btn btn-logout">ログアウト</button>
@@ -636,51 +641,8 @@
                 <span>📚</span> 受講コンテンツ一覧
             </div>
 
-            <div class="training-grid">
-                <!-- 1. 感染症対策 -->
-                <div class="training-card">
-                    <div class="card-body" onclick="openDetail('infection')" style="cursor: pointer;">
-                        <span class="card-tag tag-mandatory">法定必須</span>
-                        <a class="card-title-link">
-                            1. 感染症対策・身体拘束廃止の基本 ➔
-                        </a>
-                        <p class="card-desc">施設内での感染拡大防止手順と、身体拘束ゼロに向けた具体的なケア方法について学習します。</p>
-                        <div class="card-footer" style="justify-content: flex-end;">
-                            <button class="btn-detail"
-                                onclick="event.stopPropagation(); openDetail('infection')">受講する</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. 事故防止 -->
-                <div class="training-card">
-                    <div class="card-body" onclick="openDetail('safety')" style="cursor: pointer;">
-                        <span class="card-tag tag-mandatory">法定必須</span>
-                        <a class="card-title-link">
-                            2. 事故防止（ヒヤリハット）と安全管理 ➔
-                        </a>
-                        <p class="card-desc">転倒・転落事故を未然に防ぐ予防アプローチと、報告書の活用方法を解説します。</p>
-                        <div class="card-footer" style="justify-content: flex-end;">
-                            <button class="btn-detail"
-                                onclick="event.stopPropagation(); openDetail('safety')">受講する</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. 介助動作 -->
-                <div class="training-card">
-                    <div class="card-body" onclick="openDetail('care')" style="cursor: pointer;">
-                        <span class="card-tag tag-optional">スキルアップ</span>
-                        <a class="card-title-link">
-                            3. 介助動作とトランスファーのコツ ➔
-                        </a>
-                        <p class="card-desc">ノーリフティングケアの考え方に基づいた、負担の少ない移乗介助を学びます。</p>
-                        <div class="card-footer" style="justify-content: flex-end;">
-                            <button class="btn-detail"
-                                onclick="event.stopPropagation(); openDetail('care')">受講する</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="training-grid" id="training-grid">
+                <!-- JSで動的にカードが追加されます -->
             </div>
         </main>
 
@@ -692,10 +654,43 @@
                 <div class="detail-header">
                     <span id="detail-tag" class="card-tag"></span>
                     <h1 id="detail-title" class="detail-title"></h1>
+                    <div id="detail-author-info" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0; font-size: 0.85rem; color: #64748b;">
+                        <div style="margin-bottom: 0.4rem;"><span style="font-weight: 600;">作成者：</span><span id="detail-author-name"></span></div>
+                        <div><span style="font-weight: 600;">作成日：</span><span id="detail-created-date"></span></div>
+                    </div>
                 </div>
 
-                <div class="video-container">
-                    <iframe id="detail-video" src="" title="研修動画" allowfullscreen></iframe>
+                <div class="content-block" style="padding: 0; border: none; background: none; margin-bottom: 0;">
+                    <!-- コンテンツ選択タブ -->
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; flex-wrap: wrap;">
+                        <button class="content-tab-btn active" data-tab="video" style="padding: 0.5rem 1rem; background: none; border: none; cursor: pointer; font-weight: 600; color: #2563eb; border-bottom: 3px solid #2563eb; margin-bottom: -2px;">📹 動画</button>
+                        <button class="content-tab-btn" data-tab="slides" style="padding: 0.5rem 1rem; background: none; border: none; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px;">🖼️ スライド</button>
+                        <button class="content-tab-btn" data-tab="pdf" style="padding: 0.5rem 1rem; background: none; border: none; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px;">📄 PDF</button>
+                    </div>
+
+                    <!-- 動画タブ -->
+                    <div id="content-tab-video" class="content-tab-pane" style="display: block; margin-bottom: 1.5rem;">
+                        <div class="video-container" style="margin-bottom: 0;">
+                            <iframe id="detail-video" src="" title="研修動画" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                    <!-- スライドタブ -->
+                    <div id="content-tab-slides" class="content-tab-pane" style="display: none; margin-bottom: 1.5rem;">
+                        <div class="video-container" style="margin-bottom: 0;">
+                            <iframe id="detail-slides" src="" title="研修スライド" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                    <!-- PDFタブ -->
+                    <div id="content-tab-pdf" class="content-tab-pane" style="display: none; margin-bottom: 1.5rem;">
+                        <div style="text-align: center; padding: 2rem; background-color: #f8fafc; border-radius: 6px;">
+                            <a id="detail-pdf-link" href="#" target="_blank" class="btn btn-primary"
+                                style="display: inline-block; text-decoration: none;">
+                                📄 PDF資料を開く・ダウンロード
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="content-block">
@@ -706,6 +701,7 @@
                 <!-- 受講者選択・感想入力・完了記録エリア -->
                 <div class="action-area">
                     <div class="form-row-group">
+                        <span id="detail-completion-status" style="font-size: 0.85rem; color: #2563eb; margin-bottom: 0.5rem; cursor: pointer; text-decoration: underline;" onclick="openTrainingStatusModal()"></span>
                         <label>受講者選択（フロア ➔ 職種 ➔ 氏名）:</label>
                         <div class="filter-select-group">
                             <select id="detail-floor-select">
@@ -713,7 +709,14 @@
                                 <option value="1階">1階</option>
                             </select>
                             <select id="detail-role-select">
-                                <!-- JSで動的に職種がセットされます -->
+                                <option value="介護職">介護職</option>
+                                <option value="看護職">看護職</option>
+                                <option value="リハビリ">リハビリ</option>
+                                <option value="相談員">相談員</option>
+                                <option value="医師">医師</option>
+                                <option value="栄養士">栄養士</option>
+                                <option value="事務">事務</option>
+                                <option value="その他">その他</option>
                             </select>
                             <select id="detail-name-select">
                                 <!-- JSで動的に名前がセットされます -->
@@ -734,7 +737,7 @@
     </div>
 
     <!-- 3. 設定モーダル（職員登録） -->
-    <div id="setting-modal" class="modal-overlay">
+    <div id="setting-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>⚙️ 職員情報設定</h2>
@@ -751,7 +754,14 @@
                     </select>
 
                     <select id="staff-role">
-                        <!-- JSで切替 -->
+                        <option value="介護職">介護職</option>
+                        <option value="看護職">看護職</option>
+                        <option value="リハビリ">リハビリ</option>
+                        <option value="相談員">相談員</option>
+                        <option value="医師">医師</option>
+                        <option value="栄養士">栄養士</option>
+                        <option value="事務">事務</option>
+                        <option value="その他">その他</option>
                     </select>
 
                     <input type="text" id="staff-name" placeholder="氏名を入力">
@@ -779,7 +789,7 @@
     </div>
 
     <!-- 4. 受講履歴確認モーダル -->
-    <div id="history-modal" class="modal-overlay">
+    <div id="history-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>📊 研修受講履歴一覧</h2>
@@ -807,7 +817,60 @@
         </div>
     </div>
 
-    <!-- 研修追加モーダル -->
+    <!-- 6. Googleログイン時の職員選択モーダル -->
+    <div id="staff-selection-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>📋 職員を選択してください</h2>
+                <button id="close-staff-selection-btn" class="btn-close">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">ログイン時に使用する職員を選択してください。</p>
+
+                <div class="form-row-group">
+                    <label>フロア ➔ 職種 ➔ 氏名</label>
+                    <select id="staff-selection-floor" style="width: 100%; padding: 8px; margin-bottom: 0.5rem;">
+                        <option value="2階">2階</option>
+                        <option value="1階">1階</option>
+                    </select>
+                    <select id="staff-selection-role" style="width: 100%; padding: 8px; margin-bottom: 0.5rem;">
+                        <option value="介護職">介護職</option>
+                    </select>
+                    <select id="staff-selection-name" style="width: 100%; padding: 8px; margin-bottom: 1rem;">
+                        <option value="">職員を選択</option>
+                    </select>
+                </div>
+
+                <button id="confirm-staff-selection-btn" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">選択してログイン</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. 研修受講状況確認モーダル -->
+    <div id="training-status-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 研修受講状況</h2>
+                <button id="close-training-status-btn" class="btn-close">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;" id="training-status-title"></p>
+
+                <h3 style="font-size:0.95rem; color:#10b981; margin-top:1rem; margin-bottom:0.75rem;">✅ 研修済み</h3>
+                <div id="completed-staff-list" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <!-- 受講済みの職員が表示されます -->
+                </div>
+
+                <h3 style="font-size:0.95rem; color:#ef4444; margin-bottom:0.75rem;">⏳ 未受講</h3>
+                <div id="incomplete-staff-list" style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 1rem;">
+                    <!-- 未受講の職員が表示されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="add-training-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
             <h3>➕ 新規研修の追加</h3>
@@ -816,21 +879,42 @@
                 <label>
                     区分：
                     <select id="input-tag-class" style="width: 100%; padding: 8px; margin-top: 4px;">
-                        <option value="tag-mandatory|法定必須">法定必須</option>
-                        <option value="tag-optional|スキルアップ">スキルアップ</option>
+                        <option value="tag-mandatory|研修報告">研修報告</option>
+                        <option value="tag-optional|内部研修">内部研修</option>
                     </select>
                 </label>
 
                 <label>
                     研修タイトル：
-                    <input type="text" id="input-title" placeholder="例: 4. 虐待防止・権利擁護の推進"
+                    <input type="text" id="input-title" placeholder="例: 虐待防止・権利擁護の推進"
                         style="width: 100%; padding: 8px; margin-top: 4px;">
                 </label>
 
                 <label>
-                    作成者：
-                    <input type="text" id="input-author" placeholder="例: リハビリテーション課 山田"
-                        style="width: 100%; padding: 8px; margin-top: 4px;">
+                    研修内容の要約：
+                    <textarea id="input-summary" rows="3" placeholder="研修の内容や狙いを簡潔にまとめてください"
+                        style="width: 100%; padding: 8px; margin-top: 4px;"></textarea>
+                </label>
+
+                <label>
+                    作成者選択（フロア ➔ 職種 ➔ 氏名）：
+                    <div class="filter-select-group" style="display: flex; gap: 0.5rem; margin-top: 4px;">
+                        <select id="input-author-floor" style="flex: 1; padding: 8px;">
+                            <option value="2階">2階</option>
+                            <option value="1階">1階</option>
+                        </select>
+                        <select id="input-author-role" style="flex: 1; padding: 8px;">
+                            <option value="介護職">介護職</option>
+                        </select>
+                        <select id="input-author-name" style="flex: 1; padding: 8px;">
+                            <option value="">職員を選択</option>
+                        </select>
+                    </div>
+                </label>
+
+                <label>
+                    作成日：
+                    <input type="date" id="input-created-date" style="width: 100%; padding: 8px; margin-top: 4px;">
                 </label>
 
                 <label>
@@ -840,21 +924,15 @@
                 </label>
 
                 <label>
+                    スライドURL (Google Slides埋め込み用) / 省略可：
+                    <input type="text" id="input-slides-url" placeholder="https://docs.google.com/presentation/d/..."
+                        style="width: 100%; padding: 8px; margin-top: 4px;">
+                </label>
+
+                <label>
                     PDF資料URL / 省略可：
                     <input type="text" id="input-pdf-url" placeholder="https://example.com/document.pdf"
                         style="width: 100%; padding: 8px; margin-top: 4px;">
-                </label>
-
-                <label>
-                    サムネイル画像URL / 省略可：
-                    <input type="text" id="input-image-url" placeholder="https://example.com/image.jpg"
-                        style="width: 100%; padding: 8px; margin-top: 4px;">
-                </label>
-
-                <label>
-                    本研修のポイント（概要・説明）：
-                    <textarea id="input-description" rows="4" placeholder="研修の狙いや学べるポイントを入力してください"
-                        style="width: 100%; padding: 8px; margin-top: 4px;"></textarea>
                 </label>
             </div>
 
@@ -866,32 +944,9 @@
     </div>
 
     <!-- 5. JavaScript -->
-    <script type="module">
-        // CDN形式のインポート（そのままでOK）
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import {
-            getAuth,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            GoogleAuthProvider,
-            signInWithPopup,
-            signOut,
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // 取得した新しい firebaseConfig に差し替え
-        const firebaseConfig = {
-            apiKey: "AIzaSyAtCJTSaWFOt0YFgxtDEwVX9NHbgLKj5DE",
-            authDomain: "training-report-board.firebaseapp.com",
-            projectId: "training-report-board",
-            storageBucket: "training-report-board.firebasestorage.app",
-            messagingSenderId: "1023777229399",
-            appId: "1:1023777229399:web:12341f475d1d68a41b7112"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const googleProvider = new GoogleAuthProvider();
+    <script>
+        // ===== デモモード：Firebase なし、ローカル認証のみ =====
+        let isLoggedIn = false;
 
         const loginWrapper = document.getElementById("login-wrapper");
         const portalContainer = document.getElementById("portal-container");
@@ -903,34 +958,11 @@
         const passwordInput = document.getElementById("password");
         const signupBtn = document.getElementById("signup-btn");
         const loginBtn = document.getElementById("login-btn");
-        const googleLoginBtn = document.getElementById("google-login-btn");
         const logoutBtn = document.getElementById("logout-btn");
         const statusMsg = document.getElementById("status-message");
 
         // 研修データ
-        const trainingData = {
-            infection: {
-                tagClass: "tag-mandatory",
-                tagText: "法定必須",
-                title: "1. 感染症対策・身体拘束廃止の基本",
-                videoUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
-                description: "標準予防策の徹底や手洗い手順、防護具の脱着方法を学びます。また、身体拘束の原則禁止規定と三要件について再確認します。"
-            },
-            safety: {
-                tagClass: "tag-mandatory",
-                tagText: "法定必須",
-                title: "2. 事故防止（ヒヤリハット）と安全管理",
-                videoUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
-                description: "ヒヤリハット事例の共有と分析を通して、施設全体でのリスク管理体制を強化します。"
-            },
-            care: {
-                tagClass: "tag-optional",
-                tagText: "スキルアップ",
-                title: "3. 介助動作とトランスファーのコツ",
-                videoUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
-                description: "ボディメカニクスを活用し、腰痛を予防しながら安全に移乗する基礎をマスターします。"
-            }
-        };
+        const trainingData = {};
 
         let currentActiveKey = null;
 
@@ -958,15 +990,19 @@
 
         // 職員登録の職種ドロップダウン更新
         const updateRoleOptions = () => {
+            if (!staffFloorSelect || !staffRoleSelect) return;
             const selectedFloor = staffFloorSelect.value;
             const roles = rolesByFloor[selectedFloor] || [];
             staffRoleSelect.innerHTML = roles.map(role => `<option value="${role}">${role}</option>`).join("");
         };
 
-        staffFloorSelect.addEventListener("change", updateRoleOptions);
+        if (staffFloorSelect) {
+            staffFloorSelect.addEventListener("change", updateRoleOptions);
+        }
 
-        // --- 修正箇所：詳細ページの3段階連動ドロップダウン処理 ---
+        // --- 詳細ページの3段階連動ドロップダウン処理 ---
         const updateDetailRoleOptions = () => {
+            if (!detailFloorSelect || !detailRoleSelect) return;
             const selectedFloor = detailFloorSelect.value;
             const roles = rolesByFloor[selectedFloor] || [];
             detailRoleSelect.innerHTML = roles.map(role => `<option value="${role}">${role}</option>`).join("");
@@ -974,6 +1010,7 @@
         };
 
         const updateDetailNameOptions = () => {
+            if (!detailFloorSelect || !detailRoleSelect || !detailNameSelect) return;
             const selectedFloor = detailFloorSelect.value;
             const selectedRole = detailRoleSelect.value;
 
@@ -989,37 +1026,41 @@
             }
         };
 
-        detailFloorSelect.addEventListener("change", updateDetailRoleOptions);
-        detailRoleSelect.addEventListener("change", updateDetailNameOptions);
+        if (detailFloorSelect) detailFloorSelect.addEventListener("change", updateDetailRoleOptions);
+        if (detailRoleSelect) detailRoleSelect.addEventListener("change", updateDetailNameOptions);
 
         // 職員テーブル描画
         const renderStaffTable = () => {
+            if (!staffTableBody) return;
             staffTableBody.innerHTML = staffList.length ? staffList.map((staff, index) => `
-            <tr>
-                <td>${staff.floor}</td>
-                <td>${staff.role}</td>
-                <td>${staff.name}</td>
-                <td><button class="btn-delete" onclick="deleteStaff(${index})">削除</button></td>
-            </tr>
-        `).join("") : '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">職員が登録されていません</td></tr>';
+        <tr>
+            <td>${staff.floor}</td>
+            <td>${staff.role}</td>
+            <td>${staff.name}</td>
+            <td><button class="btn-delete" onclick="deleteStaff(${index})">削除</button></td>
+        </tr>
+    `).join("") : '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">職員が登録されていません</td></tr>';
         };
 
         // 職員追加
-        document.getElementById("add-staff-btn").addEventListener("click", () => {
-            const floor = staffFloorSelect.value;
-            const role = staffRoleSelect.value;
-            const name = staffNameInput.value.trim();
+        const addStaffBtn = document.getElementById("add-staff-btn");
+        if (addStaffBtn) {
+            addStaffBtn.addEventListener("click", () => {
+                const floor = staffFloorSelect.value;
+                const role = staffRoleSelect.value;
+                const name = staffNameInput.value.trim();
 
-            if (!name) {
-                alert("氏名を入力してください");
-                return;
-            }
+                if (!name) {
+                    alert("氏名を入力してください");
+                    return;
+                }
 
-            staffList.push({ floor, role, name });
-            localStorage.setItem("roken_staff_list", JSON.stringify(staffList));
-            staffNameInput.value = "";
-            renderStaffTable();
-        });
+                staffList.push({ floor, role, name });
+                localStorage.setItem("roken_staff_list", JSON.stringify(staffList));
+                staffNameInput.value = "";
+                renderStaffTable();
+            });
+        }
 
         // 職員削除
         window.deleteStaff = (index) => {
@@ -1030,19 +1071,21 @@
 
         // --- 受講履歴の描画と追加 ---
         const renderHistoryTable = () => {
+            if (!historyTableBody) return;
             historyTableBody.innerHTML = historyList.length ? historyList.map((item, index) => `
-            <tr>
-                <td>${item.date}</td>
-                <td>${item.staffName}<br><span style="color:#64748b; font-size:0.75rem;">（${item.staffFloor}・${item.staffRole}）</span></td>
-                <td>${item.trainingTitle}</td>
-                <td class="comment-cell">${item.comment ? escapeHtml(item.comment) : '<span style="color:#94a3b8;">（感想なし）</span>'}</td>
-                <td><button class="btn-delete" onclick="deleteHistory(${index})">削除</button></td>
-            </tr>
-        `).join("") : '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">受講履歴はありません</td></tr>';
+        <tr>
+            <td>${item.date}</td>
+            <td>${item.staffName}<br><span style="color:#64748b; font-size:0.75rem;">（${item.staffFloor}・${item.staffRole}）</span></td>
+            <td>${item.trainingTitle}</td>
+            <td class="comment-cell">${item.comment ? escapeHtml(item.comment) : '<span style="color:#94a3b8;">（感想なし）</span>'}</td>
+            <td><button class="btn-delete" onclick="deleteHistory(${index})">削除</button></td>
+        </tr>
+    `).join("") : '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">受講履歴はありません</td></tr>';
         };
 
         // HTMLエスケープ処理（安全用）
         const escapeHtml = (str) => {
+            if (!str) return "";
             return str
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
@@ -1058,77 +1101,191 @@
             renderHistoryTable();
         };
 
+        // --- 受講完了ボタン押下時の処理 ---
+        const detailCompleteBtn = document.getElementById("detail-complete-btn");
+        if (detailCompleteBtn) {
+            detailCompleteBtn.addEventListener("click", () => {
+                if (!currentActiveKey) return;
 
-        // --- 修正箇所：受講完了ボタン押下時の処理 ---
-        document.getElementById("detail-complete-btn").addEventListener("click", () => {
-            if (!currentActiveKey) return;
+                const floor = detailFloorSelect.value;
+                const role = detailRoleSelect.value;
+                const name = detailNameSelect.value;
+                const comment = detailCommentInput.value.trim();
 
-            const floor = detailFloorSelect.value;
-            const role = detailRoleSelect.value;
-            const name = detailNameSelect.value;
-            const comment = detailCommentInput.value.trim(); // 1. ここで宣言・取得
+                // 1. 職員選択のチェック
+                if (!name || name === "該当する職員がいません") {
+                    alert("受講対象の職員を選択してください。登録がない場合は「⚙️ 職員設定」から追加してください。");
+                    return;
+                }
 
-            // 1. 職員選択のチェック
-            if (!name || name === "該当する職員がいません") {
-                alert("受講対象の職員を選択してください。登録がない場合は「⚙️ 職員設定」から追加してください。");
-                return;
-            }
+                // 2. 感想未入力のチェック
+                if (comment === "") {
+                    alert("感想を入力してください。");
+                    detailCommentInput.focus();
+                    return;
+                }
 
-            // 2. 感想未入力のチェック
-            if (comment === "") {
-                alert("感想を入力してください。");
-                detailCommentInput.focus(); // 感想の入力欄にカーソルを移動
-                return; // ここで処理を中断
-            }
+                const training = trainingData[currentActiveKey];
 
-            const training = trainingData[currentActiveKey];
+                // 現在日時を取得 (YYYY/MM/DD HH:mm)
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-            // ★重複していた「const comment = ...」は削除しました★
+                const newRecord = {
+                    date: dateStr,
+                    staffName: name,
+                    staffFloor: floor,
+                    staffRole: role,
+                    trainingTitle: training.title,
+                    comment: comment
+                };
 
-            // 現在日時を取得 (YYYY/MM/DD HH:mm)
-            const now = new Date();
-            const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                historyList.unshift(newRecord);
+                localStorage.setItem("roken_history_list", JSON.stringify(historyList));
 
-            const newRecord = {
-                date: dateStr,
-                staffName: name,
-                staffFloor: floor,
-                staffRole: role,
-                trainingTitle: training.title,
-                comment: comment
-            };
+                // カード内の受講人数表示をリアルタイム更新
+                const completedCount = historyList.filter(item => item.trainingTitle === training.title).length;
+                const totalStaffCount = staffList.length;
+                const completionText = `（${completedCount}/${totalStaffCount}人）研修済み`;
+                
+                const card = document.getElementById(`card-${currentActiveKey}`);
+                if (card) {
+                    const completionSpan = card.querySelector('.card-footer span');
+                    if (completionSpan) {
+                        completionSpan.textContent = completionText;
+                    }
+                }
 
-            historyList.unshift(newRecord);
-            localStorage.setItem("roken_history_list", JSON.stringify(historyList));
+                // 詳細ページの受講人数表示もリアルタイム更新
+                const completionStatusElem = document.getElementById("detail-completion-status");
+                if (completionStatusElem) {
+                    completionStatusElem.textContent = completionText;
+                }
 
-            alert(`${name} さんの受講完了と感想を記録しました！`);
-            detailCommentInput.value = "";
-        });
+                alert(`${name} さんの受講完了と感想を記録しました！`);
+                detailCommentInput.value = "";
+            });
+        }
 
         // モーダル開閉制御
         const settingModal = document.getElementById("setting-modal");
         const historyModal = document.getElementById("history-modal");
 
-        document.getElementById("open-setting-btn").addEventListener("click", () => {
-            updateRoleOptions();
-            renderStaffTable();
-            settingModal.style.display = "flex";
+        const openSettingBtn = document.getElementById("open-setting-btn");
+        if (openSettingBtn) {
+            openSettingBtn.addEventListener("click", () => {
+                updateRoleOptions();
+                renderStaffTable();
+                settingModal.style.display = "flex";
+            });
+        }
+
+        const closeSettingBtn = document.getElementById("close-setting-btn");
+        if (closeSettingBtn) {
+            closeSettingBtn.addEventListener("click", () => {
+                settingModal.style.display = "none";
+            });
+        }
+
+        const openHistoryBtn = document.getElementById("open-history-btn");
+        if (openHistoryBtn) {
+            openHistoryBtn.addEventListener("click", () => {
+                renderHistoryTable();
+                historyModal.style.display = "flex";
+            });
+        }
+
+        const closeHistoryBtn = document.getElementById("close-history-btn");
+        if (closeHistoryBtn) {
+            closeHistoryBtn.addEventListener("click", () => {
+                historyModal.style.display = "none";
+            });
+        }
+
+        // コンテンツタブの切り替え処理
+        document.querySelectorAll(".content-tab-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const tabName = e.target.getAttribute("data-tab");
+
+                // 全タブを非表示
+                document.getElementById("content-tab-video").style.display = "none";
+                document.getElementById("content-tab-slides").style.display = "none";
+                document.getElementById("content-tab-pdf").style.display = "none";
+
+                // 全タブボタンのスタイルをリセット
+                document.querySelectorAll(".content-tab-btn").forEach(b => {
+                    b.style.color = "#64748b";
+                    b.style.borderBottom = "3px solid transparent";
+                });
+
+                // 選択されたタブを表示
+                document.getElementById(`content-tab-${tabName}`).style.display = "block";
+                e.target.style.color = "#2563eb";
+                e.target.style.borderBottom = "3px solid #2563eb";
+            });
         });
 
-        document.getElementById("close-setting-btn").addEventListener("click", () => {
-            settingModal.style.display = "none";
-        });
+        window.openTrainingStatusModal = () => {
+            if (!currentActiveKey) return;
 
-        document.getElementById("open-history-btn").addEventListener("click", () => {
-            renderHistoryTable();
-            historyModal.style.display = "flex";
-        });
+            const training = trainingData[currentActiveKey];
+            const completedCount = historyList.filter(item => item.trainingTitle === training.title).length;
+            const totalStaffCount = staffList.length;
 
-        document.getElementById("close-history-btn").addEventListener("click", () => {
-            historyModal.style.display = "none";
-        });
+            // タイトル設定
+            document.getElementById("training-status-title").textContent = `「${training.title}」の受講状況`;
 
-        // --- 修正箇所：画面遷移ロジック（詳細を開いた時にドロップダウンを初期化） ---
+            // 受講済みの職員を取得
+            const completedStaffNames = new Set(
+                historyList
+                    .filter(item => item.trainingTitle === training.title)
+                    .map(item => item.staffName)
+            );
+
+            // 受講済み職員リスト
+            const completedList = staffList.filter(staff => completedStaffNames.has(staff.name));
+            const completedHtml = completedList.length > 0 
+                ? completedList.map(staff => `
+                    <div style="padding: 0.5rem; margin-bottom: 0.5rem; background-color: #fff; border-left: 4px solid #10b981; border-radius: 4px;">
+                        <span style="color: #10b981; font-weight: 600;">✅</span> ${staff.name}
+                        <span style="font-size: 0.75rem; color: #64748b;">（${staff.floor} / ${staff.role}）</span>
+                    </div>
+                `).join("")
+                : '<div style="color: #94a3b8; padding: 0.5rem;">研修を受けた職員はいません</div>';
+
+            document.getElementById("completed-staff-list").innerHTML = completedHtml;
+
+            // 未受講職員リスト
+            const incompleteList = staffList.filter(staff => !completedStaffNames.has(staff.name));
+            const incompleteHtml = incompleteList.length > 0
+                ? incompleteList.map(staff => `
+                    <div style="padding: 0.5rem; margin-bottom: 0.5rem; background-color: #fff; border-left: 4px solid #ef4444; border-radius: 4px; opacity: 0.8;">
+                        <span style="color: #ef4444; font-weight: 600;">⏳</span> ${staff.name}
+                        <span style="font-size: 0.75rem; color: #64748b;">（${staff.floor} / ${staff.role}）</span>
+                    </div>
+                `).join("")
+                : '<div style="color: #94a3b8; padding: 0.5rem;">全員が研修を受けました！</div>';
+
+            document.getElementById("incomplete-staff-list").innerHTML = incompleteHtml;
+
+            trainingStatusModal.style.display = "flex";
+        };
+
+        const closeTrainingStatusBtn = document.getElementById("close-training-status-btn");
+        if (closeTrainingStatusBtn) {
+            closeTrainingStatusBtn.addEventListener("click", () => {
+                trainingStatusModal.style.display = "none";
+            });
+        }
+
+        // GoogleスライドのURLを埋め込み用に変換
+        const convertGoogleSlidesUrl = (url) => {
+            if (!url) return "";
+            const id = url.match(/\/d\/([^/]+)/)?.[1];
+            return id ? `https://docs.google.com/presentation/d/${id}/embed` : url;
+        };
+
+        // --- 画面遷移ロジック（詳細を開いた時にドロップダウン・コンテンツを初期化） ---
         window.openDetail = (key) => {
             currentActiveKey = key;
             const data = trainingData[key];
@@ -1139,20 +1296,67 @@
             document.getElementById("detail-tag").textContent = data.tagText;
             document.getElementById("detail-title").textContent = data.title;
             document.getElementById("detail-video").src = data.videoUrl || "";
-            document.getElementById("detail-description").textContent = data.description;
+            document.getElementById("detail-slides").src = convertGoogleSlidesUrl(data.slidesUrl) || "";
+            
+            // descriptionがない場合はsummaryを使用
+            document.getElementById("detail-description").textContent = data.description || data.summary || "";
 
-            // 作成者・PDF・画像項目の表示制御（要素が存在する場合）
-            const authorElem = document.getElementById("detail-author");
-            if (authorElem) authorElem.textContent = data.author ? `作成者: ${data.author}` : "";
+            // 作成者と作成日を表示
+            const authorNameElem = document.getElementById("detail-author-name");
+            const createdDateElem = document.getElementById("detail-created-date");
+            if (authorNameElem) {
+                authorNameElem.textContent = data.author || "（未設定）";
+            }
+            if (createdDateElem) {
+                createdDateElem.textContent = data.createdDate || "（未設定）";
+            }
 
-            const pdfElem = document.getElementById("detail-pdf-link");
-            if (pdfElem) {
+            // 受講人数を計算して表示
+            const completedCount = historyList.filter(item => item.trainingTitle === data.title).length;
+            const totalStaffCount = staffList.length;
+            const completionStatus = `（${completedCount}/${totalStaffCount}人）研修済み`;
+            document.getElementById("detail-completion-status").textContent = completionStatus;
+
+            // PDF資料の表示制御
+            const pdfLink = document.getElementById("detail-pdf-link");
+            if (pdfLink) {
                 if (data.pdfUrl) {
-                    pdfElem.href = data.pdfUrl;
-                    pdfElem.style.display = "inline-block";
+                    pdfLink.href = data.pdfUrl;
+                    pdfLink.style.display = "inline-block";
                 } else {
-                    pdfElem.style.display = "none";
+                    pdfLink.style.display = "none";
                 }
+            }
+
+            // コンテンツタブの初期化：最初に存在するコンテンツのタブを表示
+            const hasVideo = data.videoUrl;
+            const hasSlides = data.slidesUrl;
+            const hasPdf = data.pdfUrl;
+
+            // 全タブを非表示
+            document.getElementById("content-tab-video").style.display = "none";
+            document.getElementById("content-tab-slides").style.display = "none";
+            document.getElementById("content-tab-pdf").style.display = "none";
+
+            // 全タブボタンのスタイルをリセット
+            document.querySelectorAll(".content-tab-btn").forEach(btn => {
+                btn.style.color = "#64748b";
+                btn.style.borderBottom = "3px solid transparent";
+            });
+
+            // 最初に利用可能なコンテンツタブを選択
+            if (hasVideo) {
+                document.getElementById("content-tab-video").style.display = "block";
+                document.querySelector("[data-tab='video']").style.color = "#2563eb";
+                document.querySelector("[data-tab='video']").style.borderBottom = "3px solid #2563eb";
+            } else if (hasSlides) {
+                document.getElementById("content-tab-slides").style.display = "block";
+                document.querySelector("[data-tab='slides']").style.color = "#2563eb";
+                document.querySelector("[data-tab='slides']").style.borderBottom = "3px solid #2563eb";
+            } else if (hasPdf) {
+                document.getElementById("content-tab-pdf").style.display = "block";
+                document.querySelector("[data-tab='pdf']").style.color = "#2563eb";
+                document.querySelector("[data-tab='pdf']").style.borderBottom = "3px solid #2563eb";
             }
 
             detailCommentInput.value = "";
@@ -1165,76 +1369,164 @@
 
         window.closeDetail = () => {
             document.getElementById("detail-video").src = "";
+            document.getElementById("detail-slides").src = "";
             detailView.style.display = "none";
             listView.style.display = "block";
+            const trainingStatusModal = document.getElementById("training-status-modal");
+            if (trainingStatusModal) trainingStatusModal.style.display = "none";
         };
 
-        // Auth関連処理
+        // デモ用簡易認証
         const showMessage = (text, isError = false) => {
+            if (!statusMsg) return;
             statusMsg.textContent = text;
             statusMsg.className = `status-message active ${isError ? 'status-error' : 'status-info'}`;
         };
 
         const clearMessage = () => {
+            if (!statusMsg) return;
             statusMsg.textContent = "";
             statusMsg.className = "status-message";
         };
 
-        signupBtn.addEventListener("click", () => {
-            clearMessage();
+        const performLogin = () => {
             if (!emailInput.value || !passwordInput.value) {
                 showMessage("メールアドレスとパスワードを入力してください", true);
                 return;
             }
-            createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-                .catch((error) => showMessage("登録エラー: " + error.message, true));
-        });
-
-        loginBtn.addEventListener("click", () => {
-            clearMessage();
-            if (!emailInput.value || !passwordInput.value) {
-                showMessage("メールアドレスとパスワードを入力してください", true);
-                return;
-            }
-            signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-                .catch((error) => showMessage("ログインエラー: " + error.message, true));
-        });
-
-        googleLoginBtn.addEventListener("click", () => {
-            clearMessage();
-            signInWithPopup(auth, googleProvider)
-                .catch((error) => showMessage("Googleログインエラー: " + error.message, true));
-        });
-
-        logoutBtn.addEventListener("click", () => {
-            clearMessage();
-            signOut(auth);
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
+            isLoggedIn = true;
+            showMessage("ログインしました");
+            setTimeout(() => {
                 loginWrapper.style.display = "none";
                 portalContainer.style.display = "block";
+                userDisplay.textContent = emailInput.value;
+                clearMessage();
+            }, 500);
+        };
 
-                const name = user.displayName ? `${user.displayName} 様` : user.email;
-                userDisplay.textContent = name;
-            } else {
-                loginWrapper.style.display = "flex";
-                portalContainer.style.display = "none";
-                closeDetail();
-                settingModal.style.display = "none";
-                historyModal.style.display = "none";
-                emailInput.value = "";
-                passwordInput.value = "";
-            }
-        });
+        const performLogout = () => {
+            isLoggedIn = false;
+            loginWrapper.style.display = "flex";
+            portalContainer.style.display = "none";
+            closeDetail();
+            if (settingModal) settingModal.style.display = "none";
+            if (historyModal) historyModal.style.display = "none";
+            const staffSelectionModal = document.getElementById("staff-selection-modal");
+            if (staffSelectionModal) staffSelectionModal.style.display = "none";
+            const trainingStatusModal = document.getElementById("training-status-modal");
+            if (trainingStatusModal) trainingStatusModal.style.display = "none";
+            if (emailInput) emailInput.value = "";
+            if (passwordInput) passwordInput.value = "";
+        };
+
+        if (signupBtn) {
+            signupBtn.addEventListener("click", () => {
+                clearMessage();
+                performLogin();
+            });
+        }
+
+        if (loginBtn) {
+            loginBtn.addEventListener("click", () => {
+                clearMessage();
+                performLogin();
+            });
+        }
+
+        const googleLoginBtn = document.getElementById("google-login-btn");
+        if (googleLoginBtn) {
+            googleLoginBtn.addEventListener("click", () => {
+                clearMessage();
+                // 職員選択モーダルを表示
+                const staffSelectionFloor = document.getElementById("staff-selection-floor");
+                const staffSelectionRole = document.getElementById("staff-selection-role");
+                const staffSelectionName = document.getElementById("staff-selection-name");
+
+                // フロア選択時の処理
+                const updateSelectionRoleOptions = () => {
+                    if (!staffSelectionFloor || !staffSelectionRole) return;
+                    const selectedFloor = staffSelectionFloor.value;
+                    const roles = rolesByFloor[selectedFloor] || [];
+                    staffSelectionRole.innerHTML = roles.map(role => `<option value="${role}">${role}</option>`).join("");
+                    updateSelectionNameOptions();
+                };
+
+                // 職種選択時の処理
+                const updateSelectionNameOptions = () => {
+                    if (!staffSelectionFloor || !staffSelectionRole || !staffSelectionName) return;
+                    const selectedFloor = staffSelectionFloor.value;
+                    const selectedRole = staffSelectionRole.value;
+
+                    const filteredStaff = staffList.filter(s => s.floor === selectedFloor && s.role === selectedRole);
+
+                    if (filteredStaff.length === 0) {
+                        staffSelectionName.innerHTML = '<option value="">該当する職員がいません</option>';
+                    } else {
+                        staffSelectionName.innerHTML = filteredStaff.map(staff =>
+                            `<option value="${staff.name}">${staff.name}</option>`
+                        ).join("");
+                    }
+                };
+
+                // イベントリスナー設定
+                staffSelectionFloor.removeEventListener("change", updateSelectionRoleOptions);
+                staffSelectionRole.removeEventListener("change", updateSelectionNameOptions);
+                staffSelectionFloor.addEventListener("change", updateSelectionRoleOptions);
+                staffSelectionRole.addEventListener("change", updateSelectionNameOptions);
+
+                // 初期化
+                updateSelectionRoleOptions();
+
+                const staffSelectionModal = document.getElementById("staff-selection-modal");
+                staffSelectionModal.style.display = "flex";
+            });
+        }
+
+        // 職員選択モーダルを閉じる
+        const closeStaffSelectionBtn = document.getElementById("close-staff-selection-btn");
+        if (closeStaffSelectionBtn) {
+            closeStaffSelectionBtn.addEventListener("click", () => {
+                document.getElementById("staff-selection-modal").style.display = "none";
+            });
+        }
+
+        // 職員選択確定ボタン
+        const confirmStaffSelectionBtn = document.getElementById("confirm-staff-selection-btn");
+        if (confirmStaffSelectionBtn) {
+            confirmStaffSelectionBtn.addEventListener("click", () => {
+                const selectedName = document.getElementById("staff-selection-name").value.trim();
+
+                if (!selectedName || selectedName === "該当する職員がいません") {
+                    alert("職員を選択してください");
+                    return;
+                }
+
+                // ログイン完了
+                isLoggedIn = true;
+                showMessage("Googleでログインしました");
+                setTimeout(() => {
+                    loginWrapper.style.display = "none";
+                    portalContainer.style.display = "block";
+                    userDisplay.textContent = selectedName;
+                    document.getElementById("staff-selection-modal").style.display = "none";
+                    clearMessage();
+                }, 500);
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", () => {
+                clearMessage();
+                performLogout();
+            });
+        }
 
         // --- 新規研修追加の管理ロジック ---
         const addTrainingModal = document.getElementById("add-training-modal");
         const openAddTrainingBtn = document.getElementById("open-add-training-btn");
         const closeAddTrainingBtn = document.getElementById("close-add-training-btn");
         const saveTrainingBtn = document.getElementById("save-training-btn");
-        const trainingGrid = document.querySelector(".training-grid");
+        const trainingGrid = document.getElementById("training-grid") || document.querySelector(".training-grid");
 
         // ローカルストレージからカスタム研修を取得して反映
         let customTrainings = JSON.parse(localStorage.getItem("roken_custom_trainings")) || {};
@@ -1242,20 +1534,29 @@
 
         // カードを1枚動的に生成してグリッドに追加する関数
         const renderTrainingCard = (key, data) => {
+            if (!trainingGrid) return;
+            const cardDesc = data.description || data.summary || "";
+            
+            // 受講人数を計算
+            const completedCount = historyList.filter(item => item.trainingTitle === data.title).length;
+            const totalStaffCount = staffList.length;
+            const completionText = `（${completedCount}/${totalStaffCount}人）研修済み`;
+            
             const cardHtml = `
-        <div class="training-card" id="card-${key}">
-            <div class="card-body" onclick="openDetail('${key}')" style="cursor: pointer;">
-                <span class="card-tag ${data.tagClass}">${data.tagText}</span>
-                <a class="card-title-link">
-                    ${escapeHtml(data.title)} ➔
-                </a>
-                <p class="card-desc">${escapeHtml(data.description)}</p>
-                <div class="card-footer" style="justify-content: flex-end;">
-                    <button class="btn-detail" onclick="event.stopPropagation(); openDetail('${key}')">受講する</button>
+            <div class="training-card" id="card-${key}">
+                <div class="card-body" onclick="openDetail('${key}')" style="cursor: pointer;">
+                    <span class="card-tag ${data.tagClass}">${data.tagText}</span>
+                    <a class="card-title-link">
+                        ${escapeHtml(data.title)} ➔
+                    </a>
+                    <p class="card-desc">${escapeHtml(cardDesc)}</p>
+                    <div class="card-footer" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <span style="font-size: 0.8rem; color: #64748b;">${completionText}</span>
+                        <button class="btn-detail" onclick="event.stopPropagation(); openDetail('${key}')">受講する</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
             trainingGrid.insertAdjacentHTML("beforeend", cardHtml);
         };
 
@@ -1267,6 +1568,51 @@
         // モーダル開閉
         if (openAddTrainingBtn) {
             openAddTrainingBtn.addEventListener("click", () => {
+                // 作成者ドロップダウンの初期化
+                const authorFloorSelect = document.getElementById("input-author-floor");
+                const authorRoleSelect = document.getElementById("input-author-role");
+                const authorNameSelect = document.getElementById("input-author-name");
+
+                // フロア選択時の処理
+                const updateAuthorRoleOptions = () => {
+                    if (!authorFloorSelect || !authorRoleSelect) return;
+                    const selectedFloor = authorFloorSelect.value;
+                    const roles = rolesByFloor[selectedFloor] || [];
+                    authorRoleSelect.innerHTML = roles.map(role => `<option value="${role}">${role}</option>`).join("");
+                    updateAuthorNameOptions();
+                };
+
+                // 職種選択時の処理
+                const updateAuthorNameOptions = () => {
+                    if (!authorFloorSelect || !authorRoleSelect || !authorNameSelect) return;
+                    const selectedFloor = authorFloorSelect.value;
+                    const selectedRole = authorRoleSelect.value;
+
+                    const filteredStaff = staffList.filter(s => s.floor === selectedFloor && s.role === selectedRole);
+
+                    if (filteredStaff.length === 0) {
+                        authorNameSelect.innerHTML = '<option value="">該当する職員がいません</option>';
+                    } else {
+                        authorNameSelect.innerHTML = filteredStaff.map(staff =>
+                            `<option value="${staff.name}">${staff.name}</option>`
+                        ).join("");
+                    }
+                };
+
+                // イベントリスナー設定
+                authorFloorSelect.removeEventListener("change", updateAuthorRoleOptions);
+                authorRoleSelect.removeEventListener("change", updateAuthorNameOptions);
+                authorFloorSelect.addEventListener("change", updateAuthorRoleOptions);
+                authorRoleSelect.addEventListener("change", updateAuthorNameOptions);
+
+                // 初期化
+                updateAuthorRoleOptions();
+
+                // 作成日を本日の日付に設定
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+                document.getElementById("input-created-date").value = dateStr;
+
                 addTrainingModal.style.display = "flex";
             });
         }
@@ -1281,15 +1627,33 @@
         if (saveTrainingBtn) {
             saveTrainingBtn.addEventListener("click", () => {
                 const title = document.getElementById("input-title").value.trim();
-                const author = document.getElementById("input-author").value.trim();
+                const summary = document.getElementById("input-summary").value.trim();
+                const authorFloor = document.getElementById("input-author-floor").value.trim();
+                const authorRole = document.getElementById("input-author-role").value.trim();
+                const authorName = document.getElementById("input-author-name").value.trim();
+                const createdDate = document.getElementById("input-created-date").value.trim();
                 const videoUrl = document.getElementById("input-video-url").value.trim();
+                const slidesUrl = document.getElementById("input-slides-url").value.trim();
                 const pdfUrl = document.getElementById("input-pdf-url").value.trim();
-                const imageUrl = document.getElementById("input-image-url").value.trim();
-                const description = document.getElementById("input-description").value.trim();
                 const [tagClass, tagText] = document.getElementById("input-tag-class").value.split("|");
 
                 if (!title) {
                     alert("研修タイトルを入力してください");
+                    return;
+                }
+
+                if (!summary) {
+                    alert("研修内容の要約を入力してください");
+                    return;
+                }
+
+                if (!authorName || authorName === "該当する職員がいません") {
+                    alert("作成者を選択してください");
+                    return;
+                }
+
+                if (!createdDate) {
+                    alert("作成日を選択してください");
                     return;
                 }
 
@@ -1298,11 +1662,14 @@
                     tagClass,
                     tagText,
                     title,
-                    author,
+                    summary,
+                    author: authorName,
+                    authorFloor,
+                    authorRole,
+                    createdDate,
                     videoUrl,
-                    pdfUrl,
-                    imageUrl,
-                    description
+                    slidesUrl,
+                    pdfUrl
                 };
 
                 // メモリとストレージに保存
@@ -1315,17 +1682,21 @@
 
                 // 入力フォームのクリアと閉じ
                 document.getElementById("input-title").value = "";
-                document.getElementById("input-author").value = "";
+                document.getElementById("input-summary").value = "";
+                document.getElementById("input-author-floor").value = "2階";
+                document.getElementById("input-author-role").value = "";
+                document.getElementById("input-author-name").value = "";
+                document.getElementById("input-created-date").value = "";
                 document.getElementById("input-video-url").value = "";
+                document.getElementById("input-slides-url").value = "";
                 document.getElementById("input-pdf-url").value = "";
-                document.getElementById("input-image-url").value = "";
-                document.getElementById("input-description").value = "";
                 addTrainingModal.style.display = "none";
 
                 alert("研修カードを追加しました！");
             });
         }
     </script>
+
 </body>
 
 </html>
