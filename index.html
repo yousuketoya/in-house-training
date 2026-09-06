@@ -1552,6 +1552,11 @@
             if (!trainingGrid) return;
             const cardDesc = data.description || data.summary || "";
             
+            // 説明文を180文字で省略
+            const truncatedDesc = cardDesc.length > 180 
+                ? cardDesc.substring(0, 180) + "..." 
+                : cardDesc;
+            
             // 受講人数を計算
             const completedCount = historyList.filter(item => item.trainingTitle === data.title).length;
             const totalStaffCount = staffList.length;
@@ -1561,10 +1566,14 @@
             <div class="training-card" id="card-${key}">
                 <div class="card-body" onclick="openDetail('${key}')" style="cursor: pointer;">
                     <span class="card-tag ${data.tagClass}">${data.tagText}</span>
+                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">
+                        <div style="margin-bottom: 0.25rem;"><span style="font-weight: 600;">作成者：</span>${escapeHtml(data.author || "（未設定）")}</div>
+                        <div><span style="font-weight: 600;">作成日：</span>${escapeHtml(data.createdDate || "（未設定）")}</div>
+                    </div>
                     <a class="card-title-link">
                         ${escapeHtml(data.title)} ➔
                     </a>
-                    <p class="card-desc">${escapeHtml(cardDesc)}</p>
+                    <p class="card-desc">${escapeHtml(truncatedDesc)}</p>
                     <div class="card-footer" style="display: flex; flex-direction: column; gap: 0.5rem;">
                         <span style="font-size: 0.8rem; color: #64748b;">${completionText}</span>
                         <button class="btn-detail" onclick="event.stopPropagation(); openDetail('${key}')">受講する</button>
@@ -1572,7 +1581,7 @@
                 </div>
             </div>
         `;
-            trainingGrid.insertAdjacentHTML("beforeend", cardHtml);
+            trainingGrid.insertAdjacentHTML("afterbegin", cardHtml);
         };
 
         // 起動時に保存済みのカスタム研修を描画
